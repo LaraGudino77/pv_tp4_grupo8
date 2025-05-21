@@ -1,35 +1,86 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react";
+import ProductList from "./components/ProductList";
+import ProductForm from "./components/ProductForm";
 
-function App() {
-  const [count, setCount] = useState(0)
+const App = () => {
+  const [productos, setProductos] = useState([]);
+  const [descripcion, setDescripcion] = useState("");
+  const [precioUnitario, setPrecioUnitario] = useState("");
+  const [descuento, setDescuento] = useState("");
+  const [stock, setStock] = useState("");
+  const [productoEnEdicion, setProductoEnEdicion] = useState(null);
+
+  const agregarProducto = () => {
+    const nuevoProducto = {
+      id: Date.now(),
+      descripcion,
+      precioUnitario: parseFloat(precioUnitario),
+      descuento: parseFloat(descuento),
+      stock: parseInt(stock),
+    };
+    setProductos([...productos, nuevoProducto]);
+    limpiarFormulario();
+  };
+
+  const actualizarProducto = (productoActualizado) => {
+    const nuevosProductos = productos.map((p) =>
+      p.id === productoActualizado.id ? productoActualizado : p
+    );
+    setProductos(nuevosProductos);
+  };
+
+  const eliminarProducto = (id) => {
+    setProductos(productos.filter((p) => p.id !== id));
+  };
+
+  const limpiarFormulario = () => {
+    setDescripcion("");
+    setPrecioUnitario("");
+    setDescuento("");
+    setStock("");
+    setProductoEnEdicion(null);
+  };
+
+  const editarProductoDesdeFormulario = () => {
+    const productoActualizado = {
+      ...productoEnEdicion,
+      descripcion,
+      precioUnitario: parseFloat(precioUnitario),
+      descuento: parseFloat(descuento),
+      stock: parseInt(stock),
+    };
+    actualizarProducto(productoActualizado);
+    limpiarFormulario();
+  };
+
+  const onEditar = (producto) => {
+    setProductoEnEdicion(producto);
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <div>
+      <ProductForm
+        descripcion={descripcion}
+        setDescripcion={setDescripcion}
+        precioUnitario={precioUnitario}
+        setPrecioUnitario={setPrecioUnitario}
+        descuento={descuento}
+        setDescuento={setDescuento}
+        stock={stock}
+        setStock={setStock}
+        onSubmit={productoEnEdicion ? editarProductoDesdeFormulario : agregarProducto}
+        productoEnEdicion={productoEnEdicion}
+        cancelarEdicion={limpiarFormulario}
+      />
+
+      <ProductList
+        productos={productos}
+        actualizarProducto={actualizarProducto}
+        eliminarProducto={eliminarProducto}
+        onEditar={onEditar}
+      />
+    </div>
+  );
+};
 
 export default App;
