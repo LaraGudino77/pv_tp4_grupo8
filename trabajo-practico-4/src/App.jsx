@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback  } from "react";
 import ProductList from "./components/ProductList";
 import ProductForm from "./components/ProductForm";
 
@@ -10,28 +10,33 @@ const App = () => {
   const [stock, setStock] = useState("");
   const [productoEnEdicion, setProductoEnEdicion] = useState(null);
 
-  const agregarProducto = () => {
+useEffect(() => {
+    console.log("Productos actualizados:", productos);
+  }, [productos]);
+
+  const agregarProducto = useCallback(() => {
     const nuevoProducto = {
       id: Date.now(),
       descripcion,
       precioUnitario: parseFloat(precioUnitario),
       descuento: parseFloat(descuento),
       stock: parseInt(stock),
+      precioConDescuento: parseFloat(precioUnitario) * (1 - parseFloat(descuento) / 100)
     };
     setProductos([...productos, nuevoProducto]);
     limpiarFormulario();
-  };
+  }, [descripcion, precioUnitario, descuento, stock]);
 
-  const actualizarProducto = (productoActualizado) => {
+  const actualizarProducto = useCallback((productoActualizado) => {
     const nuevosProductos = productos.map((p) =>
       p.id === productoActualizado.id ? productoActualizado : p
     );
     setProductos(nuevosProductos);
-  };
+  }, [productos]);
 
-  const eliminarProducto = (id) => {
+  const eliminarProducto = useCallback((id) => {
     setProductos(productos.filter((p) => p.id !== id));
-  };
+  }, []);
 
   const limpiarFormulario = () => {
     setDescripcion("");
@@ -41,17 +46,18 @@ const App = () => {
     setProductoEnEdicion(null);
   };
 
-  const editarProductoDesdeFormulario = () => {
+  const editarProductoDesdeFormulario = useCallback(() => {
     const productoActualizado = {
       ...productoEnEdicion,
       descripcion,
       precioUnitario: parseFloat(precioUnitario),
       descuento: parseFloat(descuento),
       stock: parseInt(stock),
+      precioConDescuento: parseFloat(precioUnitario) * (1 - parseFloat(descuento) / 100)
     };
     actualizarProducto(productoActualizado);
     limpiarFormulario();
-  };
+  }, [descripcion, precioUnitario, descuento, stock, productoEnEdicion, actualizarProducto]);
 
   const onEditar = (producto) => {
     setProductoEnEdicion(producto);
